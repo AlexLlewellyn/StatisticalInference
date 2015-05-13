@@ -1,0 +1,106 @@
+---
+title: "Statistical Inference Project - ToothGrowth"
+output: word_document
+---
+### Introduction
+This project analyses the Effect of Vitamin C on Tooth Growth in Guinea Pigs
+
+### 1. Load the dataframe and perform some basic exploratory analysis. 
+
+#### Data
+The data is taken from the ToothGrowth data in the R datasets package. The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+#### Basic Summary
+
+A data frame with 60 observations on 3 variables.
+
+  - len -   numeric  Tooth length
+  - supp -   factor	Supplement type (VC or OJ).
+  - dose - 	numeric	Dose in milligrams.
+
+```{r}
+summary(ToothGrowth)
+```
+
+#### Figure One
+The graph below is a basic exploratory analysis comparing tooth growth for different doses and supplement types.
+
+```{r message=FALSE}
+library(datasets)
+library(ggplot2)
+
+## Organise Data
+
+ggplot(ToothGrowth, aes(x=factor(dose), y=len, fill=factor(supp))) +
+  facet_grid(. ~ supp) +
+  geom_bar(stat="identity") +
+  ylab('Tooth Length') + 
+  xlab('dose (mg)') + 
+  ggtitle('Tooth Length by supplement and dosage') +
+  guides(fill=guide_legend(title="Supplement type"))
+  
+```
+
+### 2. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose
+
+#### Test One - Does the supplement type have an impact on tooth growth ?  
+  
+##### Null Hypothesis - Both supplement types have the same effect on tooth growth
+  Ho :  The mean of supplement OJ equals the mean of supplement VC  
+
+##### Alternative Hypothesis - The supplement type has an effect on Tooth Growth
+  Ha :  The mean of supplement OJ is not equal to the mean of supplement VC
+
+```{r}
+t.test(data = ToothGrowth,len ~ supp, paired = FALSE,var.equal=FALSE)
+```
+
+Assuming a 95% confidence level the null hyphothes is not rejected as the p-value is more than 0.05 %.
+
+#### Test Two - Does the level of dose have an impact on Tooth Growth ?  
+
+##### Null Hypothesis One - Dose 0.5mg has the same effect on Tooth Growth as Dose 1mg
+Ho : The mean of Dose 0.5mg is equal to tbe mean of Dose 1mg
+
+```{r echo=FALSE}
+dose1 <- subset(ToothGrowth, dose == 0.5)
+dose2 <- subset(ToothGrowth, dose == 1)
+dose3 <- subset(ToothGrowth, dose == 2)
+```
+
+##### Alternative Hypothesis One - Dose 0.5mg does not have the same effect on Tooth Growth as Dose 1mg
+Ha : The mean of Dose 0.5mg is not equal to the mean of Dose 1mg
+
+```{r}
+t.test(dose1$len,dose2$len, paired = FALSE, var.equal=FALSE)
+
+```
+
+Assuming a 95% confidence level the Null Hypothesis is rejected as the p-value is
+less than 0.05 %  
+
+##### Null Hypothesis Two - Dose 1mg has the same effect on Tooth Growth as Dose 2mg
+Ho : The mean of Dose 1mg is equal to the mean of Dose 2mg
+
+##### Alternative Hypothesis Two - Dose 1mg does not have the same effect on Tooth Growth as Dose 2mg
+Ha : The mean of Dose 1mg is not equal to the mean of Dose 2mg
+
+```{r}
+t.test(dose2$len,dose3$len, paired = FALSE ,var.equal=FALSE)
+
+```
+
+Assuming a 95% confidence level the null hypothesis is rejected as the p-value is
+less than 0.05 %
+
+### 3. Conclusions
+According to the hypothesis test for supplement delivery there was not enough evidence to 
+reject the null hypothesis therefore we can conlude that the supplement method did not 
+impact the level of tooth growth significantly.
+
+The hypothesis tests for dose levels concluded that there was enough evidence to reject the null hypothesis therefore we can conclude that the level of dose did impact tooth growth significantly.
+
+### Assumptions
+- Although the documentation for the ToothGrowth dataset states that the experiment measures the tooth length in each of 10 guinea pigs at each of three dose levels with each of two delivery methods, upon further investigation it is believed that this is a bug with the documentation and the original experiment actually used 60 guinea pigs. https://bugs.r-project.org/bugzilla3/show_bug.cgi?id=15953. Therefore I am assuming the data is independant.
+- The variances are different for the seperate populations
+
